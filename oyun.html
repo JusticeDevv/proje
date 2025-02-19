@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matematik Oyunu - Profesyonel Versiyon</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f3f9fb;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            position: relative;
+            transition: background-color 0.3s;
+        }
+
+        .game-container {
+            text-align: center;
+            background-color: #fff;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            width: 450px;
+            position: relative;
+            transition: background-color 0.3s;
+        }
+
+        h1 {
+            color: #3f51b5;
+            font-size: 36px;
+        }
+
+        #question {
+            font-size: 30px;
+            margin-bottom: 30px;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .operation-btn {
+            background-color: #00796b;
+            color: white;
+            padding: 15px 25px;
+            font-size: 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        .operation-btn:hover {
+            background-color: #004d40;
+        }
+
+        #answer-input {
+            padding: 15px 25px;
+            font-size: 20px;
+            margin-top: 20px;
+            border: 2px solid #00796b;
+            border-radius: 8px;
+            width: 80%;
+        }
+
+        .exit-btn {
+            background-color: #f44336;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 8px;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        .exit-btn:hover {
+            background-color: #e53935;
+        }
+
+        .message {
+            margin-top: 30px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .level-up {
+            color: #ff9800;
+            font-size: 24px;
+            margin-top: 20px;
+        }
+
+        .shapes-container {
+            margin-top: 25px;
+            display: flex;
+            justify-content: space-evenly;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .shape {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            transition: transform 0.3s ease;
+        }
+
+        .user-info {
+            position: absolute;
+            top: 20px;
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .left-info {
+            left: 20px;
+        }
+
+        .right-info {
+            right: 20px;
+        }
+
+        .theme-btn {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            font-size: 18px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        /* Karanlık tema stil */
+        body.dark-mode {
+            background-color: #333;
+            color: #fff;
+        }
+
+        body.dark-mode .game-container {
+            background-color: #222;
+            color: #fff;
+        }
+
+        body.dark-mode .operation-btn {
+            background-color: #00695c;
+        }
+
+        body.dark-mode .operation-btn:hover {
+            background-color: #004d40;
+        }
+
+        body.dark-mode #answer-input {
+            border: 2px solid #00695c;
+            background-color: #444;
+            color: #fff;
+        }
+
+        body.dark-mode .exit-btn {
+            background-color: #e53935;
+        }
+
+        body.dark-mode .exit-btn:hover {
+            background-color: #c62828;
+        }
+
+        body.dark-mode .message {
+            color: #ffeb3b;
+        }
+
+        body.dark-mode .level-up {
+            color: #ff9800;
+        }
+
+        /* Karanlık temada sağ ve sol üst metinler */
+        body.dark-mode .user-info {
+            color: #fff; /* Metin rengini beyaz yapalım */
+        }
+
+        /* Responsive tasarım */
+        @media (max-width: 600px) {
+            .game-container {
+                width: 90%;
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 28px;
+            }
+
+            #question {
+                font-size: 24px;
+            }
+
+            .operation-btn,
+            #answer-input {
+                font-size: 16px;
+                padding: 12px 20px;
+            }
+
+            .exit-btn {
+                padding: 10px 15px;
+                font-size: 14px;
+            }
+
+            .level-up {
+                font-size: 20px;
+            }
+
+            .user-info {
+                font-size: 16px;
+                top: 10px;
+            }
+
+            .shapes-container {
+                gap: 10px;
+            }
+
+            .shape {
+                width: 50px;
+                height: 50px;
+            }
+
+            .theme-btn {
+                padding: 8px 16px;
+                font-size: 16px;
+            }
+        }
+    </style>
+    <script>
+        let num1, num2, correctAnswer;
+        let level = 1;
+        let shapeCount = 3;
+        let consecutiveCorrectAnswers = 0;
+        let score = 0;
+        let comboMultiplier = 1;
+        let isDarkMode = false;
+
+        function generateNumbers() {
+            num1 = Math.floor(Math.random() * 201) - 100;  // -100 ile 100 arasında tam sayı
+            num2 = Math.floor(Math.random() * 201) - 100;  // -100 ile 100 arasında tam sayı
+
+            // Yapılacak işlem belirleniyor: çıkarma, çarpma, bölme
+            const operations = ["-", "×", "÷"];
+            const operation = operations[Math.floor(Math.random() * operations.length)];
+
+            // Soruyu oluşturuyoruz
+            switch (operation) {
+                case "-":
+                    correctAnswer = num1 - num2;
+                    document.getElementById("question").innerText = `${num1} - ${num2} = ?`;
+                    break;
+                case "×":
+                    correctAnswer = num1 * num2;
+                    document.getElementById("question").innerText = `${num1} × ${num2} = ?`;
+                    break;
+                case "÷":
+                    if (num2 !== 0) { // Bölme işlemi sıfıra bölünmesin diye
+                        correctAnswer = Math.floor(num1 / num2);
+                        document.getElementById("question").innerText = `${num1} ÷ ${num2} = ?`;
+                    } else {
+                        generateNumbers();  // Bölme sıfır ise tekrar soruyu üret
+                        return;
+                    }
+                    break;
+            }
+
+            generateShapes();
+        }
+
+        function handleOperation() {
+            let message = document.getElementById("message");
+            let userAnswer = parseInt(document.getElementById("answer-input").value);
+
+            if (userAnswer === correctAnswer) {
+                message.innerText = "Doğru!";
+                message.style.color = "#4CAF50";
+                consecutiveCorrectAnswers++;
+                score += comboMultiplier; // Combo bonusuyla birlikte puan ekleniyor
+                updateScore();
+
+                if (consecutiveCorrectAnswers === 2) {
+                    comboMultiplier = 2;  // Combo x2
+                    message.innerText += " Combo x2!";
+                }
+                if (consecutiveCorrectAnswers === 3) {
+                    comboMultiplier = 3;  // Combo x3
+                    message.innerText += " Combo x3!";
+                }
+                levelUp();
+                showConfetti();
+            } else {
+                message.innerText = `Yanlış! Doğru cevap: ${correctAnswer}`;
+                message.style.color = "#f44336";
+                consecutiveCorrectAnswers = 0;
+                comboMultiplier = 1;  // Combo sıfırlanıyor
+            }
+        }
+
+        function levelUp() {
+            level++;
+            if (level % 3 === 0) {
+                shapeCount++;
+            }
+            document.getElementById("level").innerText = `Seviye: ${level}`;
+            generateNumbers();
+        }
+
+        function generateShapes() {
+            let shapesContainer = document.getElementById("shapes-container");
+            shapesContainer.innerHTML = "";
+            for (let i = 0; i < shapeCount; i++) {
+                let shape = document.createElement("div");
+                shape.classList.add("shape");
+                shape.style.backgroundColor = getRandomColor();
+                shape.style.transform = `rotate(${Math.random() * 360}deg)`;
+                shapesContainer.appendChild(shape);
+            }
+        }
+
+        function getRandomColor() {
+            const colors = ["#4CAF50", "#FF5722", "#FFC107", "#03A9F4", "#9C27B0"];
+            return colors[Math.floor(Math.random() * colors.length)];
+        }
+
+        function updateScore() {
+            document.getElementById("score").innerText = `Puan: ${score}`;
+        }
+
+        function showConfetti() {
+            let confetti = document.createElement("div");
+            confetti.classList.add("confetti");
+            for (let i = 0; i < 100; i++) {
+                let confettiPiece = document.createElement("div");
+                confettiPiece.style.left = `${Math.random() * 100}%`;
+                confettiPiece.style.animationDuration = `${Math.random() * 2 + 3}s`; // Farklı hızda düşecek
+                confetti.appendChild(confettiPiece);
+            }
+            document.body.appendChild(confetti);
+            setTimeout(() => confetti.style.display = 'none', 5000); // Konfeti 5 saniye sonra kaybolur
+        }
+
+        function toggleTheme() {
+            isDarkMode = !isDarkMode;
+            document.body.classList.toggle("dark-mode", isDarkMode);
+        }
+
+        window.onload = () => {
+            generateNumbers();
+        };
+    </script>
+</head>
+<body>
+    <!-- Yeni sol üst ve sağ üst kutular -->
+    <div class="user-info left-info">Ömür AKSOY</div>
+    <div class="user-info right-info">Serkan KESKİN</div>
+
+    <div class="game-container">
+        <h1>Matematik Oyunu</h1>
+        <p id="question"></p>
+        <input type="number" id="answer-input" placeholder="Cevabınızı girin" />
+        <button class="operation-btn" onclick="handleOperation()">Cevabı Gönder</button>
+        <button class="exit-btn" onclick="window.close()">Çıkış</button>
+        <p id="message" class="message"></p>
+        <p id="level" class="level-up">Seviye: 1</p>
+        <p id="score" class="level-up">Puan: 0</p>
+        <div id="shapes-container" class="shapes-container"></div>
+    </div>
+    
+    <button class="theme-btn" onclick="toggleTheme()">Karanlık Temaya Geç</button>
+</body>
+</html>
